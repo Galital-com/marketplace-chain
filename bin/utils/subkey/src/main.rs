@@ -18,7 +18,7 @@
 
 //! Subkey utility, based on node_runtime.
 
-use node_runtime::Runtime;
+use starkley_node_runtime::Runtime;
 
 fn main() -> Result<(), sc_cli::Error> {
 	subkey::run::<Runtime>()

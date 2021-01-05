@@ -39,7 +39,7 @@ use sp_runtime::{
 	traits::{Block as BlockT, Verify, Zero, IdentifyAccount},
 };
 use codec::{Decode, Encode};
-use node_runtime::{
+use starkley_node_runtime::{
 	Call,
 	CheckedExtrinsic,
 	constants::currency::DOLLARS,
@@ -250,13 +250,13 @@ impl<'a> Iterator for BlockContentIterator<'a> {
 
 		let signed = self.keyring.sign(
 			CheckedExtrinsic {
-				signed: Some((sender, signed_extra(0, node_runtime::ExistentialDeposit::get() + 1))),
+				signed: Some((sender, signed_extra(0, starkley_node_runtime::ExistentialDeposit::get() + 1))),
 				function: match self.content.block_type {
 					BlockType::RandomTransfersKeepAlive => {
 						Call::Balances(
 							BalancesCall::transfer_keep_alive(
 								pallet_indices::address::Address::Id(receiver),
-								node_runtime::ExistentialDeposit::get() + 1,
+								starkley_node_runtime::ExistentialDeposit::get() + 1,
 							)
 						)
 					},
@@ -266,7 +266,7 @@ impl<'a> Iterator for BlockContentIterator<'a> {
 								pallet_indices::address::Address::Id(receiver),
 								// Transfer so that ending balance would be 1 less than existential deposit
 								// so that we kill the sender account.
-								100*DOLLARS - (node_runtime::ExistentialDeposit::get() - 1),
+								100*DOLLARS - (starkley_node_runtime::ExistentialDeposit::get() - 1),
 							)
 						)
 					},
@@ -535,10 +535,10 @@ impl BenchKeyring {
 	}
 
 	/// Generate genesis with accounts from this keyring endowed with some balance.
-	pub fn generate_genesis(&self) -> node_runtime::GenesisConfig {
+	pub fn generate_genesis(&self) -> starkley_node_runtime::GenesisConfig {
 		crate::genesis::config_endowed(
 			false,
-			Some(node_runtime::wasm_binary_unwrap()),
+			Some(starkley_node_runtime::wasm_binary_unwrap()),
 			self.collect_account_ids(),
 		)
 	}

@@ -20,12 +20,12 @@
 
 use crate::keyring::*;
 use sp_keyring::{Ed25519Keyring, Sr25519Keyring};
-use node_runtime::{
+use starkley_node_runtime::{
 	GenesisConfig, BalancesConfig, SessionConfig, StakingConfig, SystemConfig,
 	GrandpaConfig, IndicesConfig, ContractsConfig, SocietyConfig, wasm_binary_unwrap,
 	AccountId, StakerStatus,
 };
-use node_runtime::constants::currency::*;
+use starkley_node_runtime::constants::currency::*;
 use sp_core::ChangesTrieConfiguration;
 use sp_runtime::Perbill;
 

@@ -238,13 +238,13 @@ test-deterministic-wasm:
       - $DEPLOY_TAG
   script:
     # build runtime
-    - WASM_BUILD_NO_COLOR=1 cargo build --verbose --release -p node-runtime
+    - WASM_BUILD_NO_COLOR=1 cargo build --verbose --release -p starkley-node-runtime
     # make checksum
-    - sha256sum target/release/wbuild/target/wasm32-unknown-unknown/release/node_runtime.wasm > checksum.sha256
+    - sha256sum target/release/wbuild/target/wasm32-unknown-unknown/release/starkley_node_runtime.wasm > checksum.sha256
     # clean up – FIXME: can we reuse some of the artifacts?
     - cargo clean
     # build again
-    - WASM_BUILD_NO_COLOR=1 cargo build --verbose --release -p node-runtime
+    - WASM_BUILD_NO_COLOR=1 cargo build --verbose --release -p starkley-node-runtime
     # confirm checksum
     - sha256sum -c checksum.sha256
     - sccache -s
