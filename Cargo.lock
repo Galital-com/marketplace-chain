@@ -4450,6 +4450,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-ipfs"
+version = "2.0.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+]
+
+[[package]]
 name = "pallet-membership"
 version = "2.0.0"
 dependencies = [
@@ -8334,6 +8346,7 @@ dependencies = [
  "pallet-identity",
  "pallet-im-online",
  "pallet-indices",
+ "pallet-ipfs",
  "pallet-membership",
  "pallet-multisig",
  "pallet-offences",
