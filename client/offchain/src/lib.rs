@@ -81,6 +81,7 @@ where
 pub struct OffchainWorkers<Client, Storage, Block: traits::Block> {
 	client: Arc<Client>,
 	db: Storage,
+	ipfs_node: ipfs::Ipfs<ipfs::Types>,
 	_block: PhantomData<Block>,
 	thread_pool: Mutex<ThreadPool>,
 	shared_client: SharedClient,
@@ -88,11 +89,29 @@ pub struct OffchainWorkers<Client, Storage, Block: traits::Block> {
 
 impl<Client, Storage, Block: traits::Block> OffchainWorkers<Client, Storage, Block> {
 	/// Creates new `OffchainWorkers`.
-	pub fn new(client: Arc<Client>, db: Storage) -> Self {
+	pub fn new(client: Arc<Client>, db: Storage, ipfs_rt: Arc<Mutex<tokio::runtime::Runtime>>) -> Self {
 		let shared_client = SharedClient::new();
+		let (ipfs_node, node_info) = std::thread::spawn(move || {
+		    let mut ipfs_rt = ipfs_rt.lock();
+			let options = ipfs::IpfsOptions::inmemory_with_generated_keys();
+			ipfs_rt.block_on(async move {
+				// Start daemon and initialize repo
+				let (ipfs, fut) = ipfs::UninitializedIpfs::new(options).start().await.unwrap();
+				tokio::task::spawn(fut);
+				let node_info = ipfs.identity().await.unwrap();
+				(ipfs, node_info)
+			})
+		}).join().expect("couldn't start the IPFS async runtime");
+
+		log::info!(
+		    "IPFS: node started with PeerId {} and addresses {:?}",
+		    node_info.0.into_peer_id(), node_info.1
+		);
+
 		Self {
 			client,
 			db,
+			ipfs_node,
 			_block: PhantomData,
 			thread_pool: Mutex::new(ThreadPool::new(num_cpus::get())),
 			shared_client,
@@ -150,6 +169,7 @@ impl<Client, Storage, Block> OffchainWorkers<
 			let (api, runner) = api::AsyncApi::new(
 				self.db.clone(),
 				network_provider,
+				self.ipfs_node.clone(),
 				is_validator,
 				self.shared_client.clone(),
 			);
@@ -294,9 +314,10 @@ mod tests {
 		let db = sc_client_db::offchain::LocalStorage::new_test();
 		let network = Arc::new(TestNetwork());
 		let header = client.header(&BlockId::number(0)).unwrap().unwrap();
+		let mut ipfs_rt = tokio::runtime::Runtime::new().unwrap();
 
 		// when
-		let offchain = OffchainWorkers::new(client, db);
+		let offchain: OffchainWorkers<_, _, _> = OffchainWorkers::new(client, db, &mut ipfs_rt);
 		futures::executor::block_on(
 			offchain.on_block_imported(&header, network, false)
 		);

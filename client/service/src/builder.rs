@@ -222,10 +222,11 @@ pub fn new_full_parts<TBl, TRtApi, TExecDisp>(
 		)?,
 		KeystoreConfig::InMemory => Keystore::new_in_memory(),
 	};
-
+	let ipfs_rt = tokio::runtime::Runtime::new().expect("couldn't start the IPFS runtime");
+	
 	let task_manager = {
 		let registry = config.prometheus_config.as_ref().map(|cfg| &cfg.registry);
-		TaskManager::new(config.task_executor.clone(), registry)?
+		TaskManager::new(config.task_executor.clone(), ipfs_rt, registry)?
 	};
 
 	let executor = NativeExecutor::<TExecDisp>::new(
@@ -283,10 +284,10 @@ pub fn new_light_parts<TBl, TRtApi, TExecDisp>(
 	TBl: BlockT,
 	TExecDisp: NativeExecutionDispatch + 'static,
 {
-
+	let ipfs_rt = tokio::runtime::Runtime::new().expect("couldn't start the IPFS runtime");
 	let task_manager = {
 		let registry = config.prometheus_config.as_ref().map(|cfg| &cfg.registry);
-		TaskManager::new(config.task_executor.clone(), registry)?
+		TaskManager::new(config.task_executor.clone(), ipfs_rt, registry)?
 	};
 
 	let keystore = match &config.keystore {
@@ -417,6 +418,7 @@ pub fn build_offchain_workers<TBl, TBackend, TCl>(
 	spawn_handle: SpawnTaskHandle,
 	client: Arc<TCl>,
 	network: Arc<NetworkService<TBl, <TBl as BlockT>::Hash>>,
+	ipfs_rt: Arc<parking_lot::Mutex<tokio::runtime::Runtime>>,
 ) -> Option<Arc<sc_offchain::OffchainWorkers<TCl, TBackend::OffchainStorage, TBl>>>
 	where
 		TBl: BlockT, TBackend: sc_client_api::Backend<TBl>,
@@ -426,7 +428,7 @@ pub fn build_offchain_workers<TBl, TBackend, TCl>(
 {
 	let offchain_workers = match backend.offchain_storage() {
 		Some(db) => {
-			Some(Arc::new(sc_offchain::OffchainWorkers::new(client.clone(), db)))
+			Some(Arc::new(sc_offchain::OffchainWorkers::new(client.clone(), db, ipfs_rt)))
 		},
 		None => {
 			warn!("Offchain workers disabled, due to lack of offchain storage support in backend.");

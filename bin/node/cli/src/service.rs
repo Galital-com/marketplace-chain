@@ -197,7 +197,7 @@ pub fn new_full_base(
 
 	if config.offchain_worker.enabled {
 		sc_service::build_offchain_workers(
-			&config, backend.clone(), task_manager.spawn_handle(), client.clone(), network.clone(),
+			&config, backend.clone(), task_manager.spawn_handle(), client.clone(), network.clone(), task_manager.ipfs_rt.clone(),
 		);
 	}
 
@@ -420,7 +420,7 @@ pub fn new_light_base(config: Configuration) -> Result<(
 
 	if config.offchain_worker.enabled {
 		sc_service::build_offchain_workers(
-			&config, backend.clone(), task_manager.spawn_handle(), client.clone(), network.clone(),
+			&config, backend.clone(), task_manager.spawn_handle(), client.clone(), network.clone(), task_manager.ipfs_rt.clone(),
 		);
 	}
 

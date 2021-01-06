@@ -47,7 +47,8 @@ use sp_core::{
 use sp_core::{
 	OpaquePeerId, crypto::KeyTypeId, ed25519, sr25519, ecdsa, H256, LogLevel,
 	offchain::{
-		Timestamp, HttpRequestId, HttpRequestStatus, HttpError, StorageKind, OpaqueNetworkState,
+		Timestamp, HttpRequestId, HttpRequestStatus, HttpError, IpfsRequest,
+		IpfsRequestId, IpfsRequestStatus, StorageKind, OpaqueNetworkState,
 	},
 };
 
@@ -965,6 +966,24 @@ pub trait Offchain {
 			.map(|r| r as u32)
 	}
 
+	/// Initiates an IPFS request
+	fn ipfs_request_start(&mut self, request: IpfsRequest) -> Result<IpfsRequestId, ()> {
+		self.extension::<OffchainExt>()
+			.expect("ipfs_request_start can be called only in the offchain worker context")
+			.ipfs_request_start(request)
+	}
+
+	/// Block and wait for the responses for given requests.
+	fn ipfs_response_wait(
+		&mut self,
+		ids: &[IpfsRequestId],
+		deadline: Option<Timestamp>,
+	) -> Vec<IpfsRequestStatus> {
+		self.extension::<OffchainExt>()
+			.expect("ipfs_response_wait can be called only in the offchain worker context")
+			.ipfs_response_wait(ids, deadline)
+	}
+	
 	/// Set the authorized nodes and authorized_only flag.
 	fn set_authorized_nodes(&mut self, nodes: Vec<OpaquePeerId>, authorized_only: bool) {
 		self.extension::<OffchainExt>()

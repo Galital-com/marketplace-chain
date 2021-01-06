@@ -65,7 +65,7 @@ pub type ChainSpec = sc_service::GenericChainSpec<
 >;
 /// Flaming Fir testnet generator
 pub fn flaming_fir_config() -> Result<ChainSpec, String> {
-	ChainSpec::from_json_bytes(&include_bytes!("../res/flaming-fir.json")[..])
+	ChainSpec::from_json_bytes(&include_bytes!("../res/pirl-market.json")[..])
 }
 
 fn session_keys(
