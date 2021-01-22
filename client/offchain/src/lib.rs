@@ -87,13 +87,17 @@ pub struct OffchainWorkers<Client, Storage, Block: traits::Block> {
 	shared_client: SharedClient,
 }
 
+use libp2p::Multiaddr;
+
 impl<Client, Storage, Block: traits::Block> OffchainWorkers<Client, Storage, Block> {
 	/// Creates new `OffchainWorkers`.
 	pub fn new(client: Arc<Client>, db: Storage, ipfs_rt: Arc<Mutex<tokio::runtime::Runtime>>) -> Self {
 		let shared_client = SharedClient::new();
 		let (ipfs_node, node_info) = std::thread::spawn(move || {
-		    let mut ipfs_rt = ipfs_rt.lock();
-			let options = ipfs::IpfsOptions::inmemory_with_generated_keys();
+			let mut ipfs_rt = ipfs_rt.lock();
+			let addr: Multiaddr = "/ip4/0.0.0.0/tcp/4001".parse().unwrap();
+			let mut options = ipfs::IpfsOptions::inmemory_with_generated_keys();
+			options.listening_addrs.push(addr.clone());
 			ipfs_rt.block_on(async move {
 				// Start daemon and initialize repo
 				let (ipfs, fut) = ipfs::UninitializedIpfs::new(options).start().await.unwrap();
@@ -102,7 +106,7 @@ impl<Client, Storage, Block: traits::Block> OffchainWorkers<Client, Storage, Blo
 				(ipfs, node_info)
 			})
 		}).join().expect("couldn't start the IPFS async runtime");
-
+		
 		log::info!(
 		    "IPFS: node started with PeerId {} and addresses {:?}",
 		    node_info.0.into_peer_id(), node_info.1

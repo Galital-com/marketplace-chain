@@ -222,12 +222,14 @@ pub struct TaskManager {
 	/// terminates and gracefully shutdown. Also ends the parent `future()` if a child's essential
 	/// task fails.
 	children: Vec<TaskManager>,
+	/// The executor for Ipfs.
 	pub ipfs_rt: std::sync::Arc<parking_lot::Mutex<tokio::runtime::Runtime>>,
 }
 
 impl TaskManager {
  	/// If a Prometheus registry is passed, it will be used to report statistics about the
  	/// service tasks.
+	 
 	pub(super) fn new(
 		executor: TaskExecutor,
 		ipfs_rt: tokio::runtime::Runtime,
