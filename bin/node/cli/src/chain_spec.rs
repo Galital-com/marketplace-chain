@@ -25,7 +25,7 @@ use starkley_node_runtime::{
 	AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, ContractsConfig, CouncilConfig,
 	GrandpaConfig, ImOnlineConfig, SessionConfig, SessionKeys, StakerStatus,
 	StakingConfig, ElectionsConfig, IndicesConfig, SudoConfig, SystemConfig,
-	TechnicalCommitteeConfig, wasm_binary_unwrap,
+	TechnicalCommitteeConfig, wasm_binary_unwrap, TokensConfig, CurrencyId,
 };
 use starkley_node_runtime::Block;
 use starkley_node_runtime::constants::currency::*;
@@ -296,6 +296,17 @@ pub fn testnet_genesis(
 		}),
 		pallet_sudo: Some(SudoConfig {
 			key: root_key,
+		}),
+		orml_tokens: Some(TokensConfig {
+			endowed_accounts: endowed_accounts
+			.iter()
+			.flat_map(|x| {
+				vec![
+					(x.clone(), CurrencyId::DOT, 10u128.pow(16)),
+					(x.clone(), CurrencyId::BTC, 10u128.pow(16)),
+				]
+			})
+			.collect(),
 		}),
 		pallet_babe: Some(BabeConfig {
 			authorities: vec![],

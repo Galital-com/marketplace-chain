@@ -113,5 +113,6 @@ pub fn config_endowed(
 		pallet_sudo: Some(Default::default()),
 		pallet_treasury: Some(Default::default()),
 		pallet_vesting: Some(Default::default()),
+		orml_tokens: Default::default(),
 	}
 }
