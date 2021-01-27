@@ -95,9 +95,7 @@ use sp_runtime::generic::Era;
 pub enum CurrencyId {
 	Native,
 	PIRL,
-	DOT,
-	KSM,
-	BTC,
+	pUSD,
 }
 
 pub type Amount = i128;

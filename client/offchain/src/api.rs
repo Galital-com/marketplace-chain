@@ -23,7 +23,6 @@ use std::{
 };
 
 use crate::NetworkProvider;
-use futures::Future;
 use log::error;
 use sc_network::{PeerId, Multiaddr};
 use codec::{Encode, Decode};

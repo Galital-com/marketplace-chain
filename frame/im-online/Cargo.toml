@@ -28,6 +28,10 @@ frame-system = { version = "2.0.0", default-features = false, path = "../system"
 
 frame-benchmarking = { version = "2.0.0", default-features = false, path = "../benchmarking", optional = true }
 
+pallet-ipfs = { version = "2.0.0", default-features = false, path = "../../bin/node/pallets/ipfs-pallets", package = "pallet-ipfs" }
+
+
+
 [features]
 default = ["std", "pallet-session/historical"]
 std = [

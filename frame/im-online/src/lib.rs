@@ -80,6 +80,7 @@ use sp_core::offchain::OpaqueNetworkState;
 use sp_std::prelude::*;
 use sp_std::convert::TryInto;
 use pallet_session::historical::IdentificationTuple;
+use pallet_ipfs::is_masternode;
 use sp_runtime::{
 	offchain::storage::StorageValueRef,
 	RuntimeDebug,
@@ -462,6 +463,11 @@ impl<T: Trait> Module<T> {
 		let heartbeat_after = <HeartbeatAfter<T>>::get();
 		if block_number < heartbeat_after {
 			return Err(OffchainErr::TooEarly(heartbeat_after))
+		}
+		// we check if it's a masternode otherwise we don't send the hearthbeats
+		let node_checker = is_masternode();
+		if node_checker == false {
+			return Err(OffchainErr::NetworkState)
 		}
 
 		let session_index = <pallet_session::Module<T>>::current_index();

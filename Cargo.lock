@@ -4728,6 +4728,7 @@ dependencies = [
  "frame-support",
  "frame-system",
  "pallet-authorship",
+ "pallet-ipfs",
  "pallet-session",
  "parity-scale-codec",
  "serde",
