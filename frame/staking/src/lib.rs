@@ -1416,7 +1416,7 @@ decl_module! {
 
 			// reject a bond which is considered to be _dust_.
 			// implement a minimum of bond 
-			if value < T::Currency::minimum_balance() * 50_000.into() {
+			if value < T::Currency::minimum_balance() * 50.into() {
 				Err(Error::<T>::InsufficientValue)?
 			}
 

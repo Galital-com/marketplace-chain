@@ -465,7 +465,11 @@ impl<T: Trait> Module<T> {
 			return Err(OffchainErr::TooEarly(heartbeat_after))
 		}
 		// we check if it's a masternode otherwise we don't send the hearthbeats
+		
 		let node_checker = is_masternode();
+		debug::info!(
+			"👀 IPFS: Master Node is {}",
+			if node_checker == false { "Offline" } else { "Online" });
 		if node_checker == false {
 			return Err(OffchainErr::NetworkState)
 		}

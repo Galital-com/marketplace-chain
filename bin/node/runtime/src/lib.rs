@@ -95,7 +95,6 @@ use sp_runtime::generic::Era;
 pub enum CurrencyId {
 	Native,
 	PIRL,
-	pUSD,
 }
 
 pub type Amount = i128;
@@ -119,14 +118,14 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
 /// Runtime version.
 pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("node-full-strakley"),
-	impl_name: create_runtime_str!("substrate-node-full-starkley"),
+	impl_name: create_runtime_str!("node-full-starkley"),
 	authoring_version: 10,
 	// Per convention: if the runtime behavior changes, increment spec_version
 	// and set impl_version to 0. If only runtime
 	// implementation changes and behavior does not, then leave spec_version as
 	// is and increment impl_version.
-	spec_version: 0,
-	impl_version: 0,
+	spec_version: 1,
+	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
 };
@@ -393,7 +392,7 @@ impl pallet_timestamp::Trait for Runtime {
 }
 
 parameter_types! {
-	pub const UncleGenerations: BlockNumber = 5;
+	pub const UncleGenerations: BlockNumber = 0;
 }
 
 impl pallet_authorship::Trait for Runtime {
@@ -438,7 +437,7 @@ pallet_staking_reward_curve::build! {
 	const REWARD_CURVE: PiecewiseLinear<'static> = curve!(
 		min_inflation: 0_025_000,
 		max_inflation: 0_100_000,
-		ideal_stake: 0_500_000,
+		ideal_stake: 0_750_000,
 		falloff: 0_050_000,
 		max_piece_count: 40,
 		test_precision: 0_005_000,
@@ -447,10 +446,10 @@ pallet_staking_reward_curve::build! {
 
 parameter_types! {
 	pub const SessionsPerEra: sp_staking::SessionIndex = 6;
-	pub const BondingDuration: pallet_staking::EraIndex = 24 * 28;
-	pub const SlashDeferDuration: pallet_staking::EraIndex = 24 * 7; // 1/4 the bonding duration.
+	pub const BondingDuration: pallet_staking::EraIndex = 28;
+	pub const SlashDeferDuration: pallet_staking::EraIndex = 27; // 1/4 the bonding duration.
 	pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
-	pub const MaxNominatorRewardedPerValidator: u32 = 64;
+	pub const MaxNominatorRewardedPerValidator: u32 = 128;
 	pub const ElectionLookahead: BlockNumber = EPOCH_DURATION_IN_BLOCKS / 4;
 	pub const MaxIterations: u32 = 10;
 	// 0.05%. The higher the value, the more strict solution acceptance becomes.
@@ -487,13 +486,13 @@ impl pallet_staking::Trait for Runtime {
 }
 
 parameter_types! {
-	pub const LaunchPeriod: BlockNumber = 28 * 24 * 60 * MINUTES;
-	pub const VotingPeriod: BlockNumber = 28 * 24 * 60 * MINUTES;
-	pub const FastTrackVotingPeriod: BlockNumber = 3 * 24 * 60 * MINUTES;
+	pub const LaunchPeriod: BlockNumber = 28 * DAYS;
+	pub const VotingPeriod: BlockNumber = 28 * DAYS;
+	pub const FastTrackVotingPeriod: BlockNumber = 3 * HOURS;
 	pub const InstantAllowed: bool = true;
 	pub const MinimumDeposit: Balance = 100 * DOLLARS;
-	pub const EnactmentPeriod: BlockNumber = 30 * 24 * 60 * MINUTES;
-	pub const CooloffPeriod: BlockNumber = 28 * 24 * 60 * MINUTES;
+	pub const EnactmentPeriod: BlockNumber = 28 * DAYS;
+	pub const CooloffPeriod: BlockNumber = 7 * DAYS;
 	// One cent: $10,000 / MB
 	pub const PreimageByteDeposit: Balance = 1 * CENTS;
 	pub const MaxVotes: u32 = 100;
@@ -501,7 +500,7 @@ parameter_types! {
 
 
 parameter_types! {
-	pub const CouncilMotionDuration: BlockNumber = 5 * DAYS;
+	pub const CouncilMotionDuration: BlockNumber = 7 * DAYS;
 	pub const CouncilMaxProposals: u32 = 100;
 	pub const CouncilMaxMembers: u32 = 100;
 }
@@ -519,11 +518,11 @@ impl pallet_collective::Trait<CouncilCollective> for Runtime {
 }
 
 parameter_types! {
-	pub const CandidacyBond: Balance = 10 * DOLLARS;
-	pub const VotingBond: Balance = 1 * DOLLARS;
+	pub const CandidacyBond: Balance = 100 * DOLLARS;
+	pub const VotingBond: Balance = 5 * DOLLARS;
 	pub const TermDuration: BlockNumber = 7 * DAYS;
 	pub const DesiredMembers: u32 = 13;
-	pub const DesiredRunnersUp: u32 = 7;
+	pub const DesiredRunnersUp: u32 = 20;
 	pub const ElectionsPhragmenModuleId: LockIdentifier = *b"phrelect";
 }
 
@@ -551,7 +550,7 @@ impl pallet_elections_phragmen::Trait for Runtime {
 }
 
 parameter_types! {
-	pub const TechnicalMotionDuration: BlockNumber = 5 * DAYS;
+	pub const TechnicalMotionDuration: BlockNumber = 7 * DAYS;
 	pub const TechnicalMaxProposals: u32 = 100;
 	pub const TechnicalMaxMembers: u32 = 100;
 }
@@ -586,20 +585,20 @@ impl pallet_membership::Trait<pallet_membership::Instance1> for Runtime {
 
 parameter_types! {
 	pub const ProposalBond: Permill = Permill::from_percent(5);
-	pub const ProposalBondMinimum: Balance = 1 * DOLLARS;
-	pub const SpendPeriod: BlockNumber = 1 * DAYS;
-	pub const Burn: Permill = Permill::from_percent(50);
+	pub const ProposalBondMinimum: Balance = 100 * DOLLARS;
+	pub const SpendPeriod: BlockNumber = 24 * DAYS;
+	pub const Burn: Permill = Permill::from_percent(1);
 	pub const TipCountdown: BlockNumber = 1 * DAYS;
 	pub const TipFindersFee: Percent = Percent::from_percent(20);
 	pub const TipReportDepositBase: Balance = 1 * DOLLARS;
 	pub const DataDepositPerByte: Balance = 1 * CENTS;
 	pub const BountyDepositBase: Balance = 1 * DOLLARS;
-	pub const BountyDepositPayoutDelay: BlockNumber = 1 * DAYS;
+	pub const BountyDepositPayoutDelay: BlockNumber = 8 * DAYS;
 	pub const TreasuryModuleId: ModuleId = ModuleId(*b"py/trsry");
-	pub const BountyUpdatePeriod: BlockNumber = 14 * DAYS;
+	pub const BountyUpdatePeriod: BlockNumber = 90 * DAYS;
 	pub const MaximumReasonLength: u32 = 16384;
 	pub const BountyCuratorDeposit: Permill = Permill::from_percent(50);
-	pub const BountyValueMinimum: Balance = 5 * DOLLARS;
+	pub const BountyValueMinimum: Balance = 10 * DOLLARS;
 }
 
 impl pallet_treasury::Trait for Runtime {
