@@ -303,7 +303,6 @@ pub fn testnet_genesis(
 			.flat_map(|x| {
 				vec![
 					(x.clone(), CurrencyId::PIRL, 10u128.pow(16)),
-					(x.clone(), CurrencyId::pUSD, 10u128.pow(16)),
 				]
 			})
 			.collect(),
